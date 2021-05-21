@@ -80,8 +80,7 @@ inline void record_interval(int tid, int idx, uint64_t val) {
 
 void dump_intervals() {
 	FILE *fp = fopen("intervals.data", "wb");
-	// fwrite(intervals, sizeof(uint64_t), sizeof(intervals), f);
-	// fclose(f);
+
 	fprintf(fp, "num_threads %lu\n", num_threads);
 	fprintf(fp, "max_records_per_thread %d\n", MAX_ENTRIES_PER_THREAD);
 
@@ -94,6 +93,8 @@ void dump_intervals() {
 	for (int i = 0; i < num_threads * MAX_ENTRIES_PER_THREAD; ++i) {
 		fprintf(fp, "%lu\n", intervals[i]);
 	}
+
+	fclose(f);
 }
 // END code for recording individual intervals per thread
 
