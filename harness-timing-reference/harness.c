@@ -30,6 +30,7 @@
 #include "atomics.h"
 
 
+// WHAT ARE THESE MEASURING?
 uint64_t start;
 uint64_t end;
 
@@ -94,7 +95,7 @@ void dump_intervals() {
 		fprintf(fp, "%lu\n", intervals[i]);
 	}
 
-	fclose(f);
+	fclose(fp);
 }
 // END code for recording individual intervals per thread
 
