@@ -128,9 +128,7 @@ rdtsc (void)
 
 uint64_t measure_time() {
   if (0) {
-    __sync_synchronize();
     uint64_t temp= rdtsc();
-    __sync_synchronize();
     return temp;
   } else {
     struct timespec t;
