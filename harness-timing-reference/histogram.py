@@ -6,7 +6,7 @@ import json
 import pprint
 from collections import defaultdict
 
-filepath = 'intervals.data'
+filepath = '../data/moore_new_1.data'
 
 metadata = {}
 
@@ -68,26 +68,40 @@ def threshold_list(data_list, low, high, unit):
 	f2 = list(filter(lambda x: x >= low, f1))
 	n = len(f2)
 	print("Total data points: " + str(len(data_list)))
-	print("Data points between (both inclusive) " 
+	print("Data points between (both inclusive) "
 		+ str(low) + unit + " and " + str(high) + unit + ": " + str(n))
 	print("Fraction is " + str(n/len(data_list)))
+def calc_intervals(data_list):
+        intervals = []
+        #print(data_list)
+        prev = data_list[0]
+        for curr in data_list[1:]:
+            interval = curr - prev
+            prev = curr
+            intervals.append(interval)
+        return intervals
 
 sanity_check(record_lengths)
-all_intervals = merge_threads_results(records)
+records_intervals = defaultdict(list)
+for t in records:
+    print("Records[{:d}]".format(t))
+    print(records[t])
+    records_intervals[t] =  calc_intervals(records[t])
+all_intervals = merge_threads_results(records_intervals)
 
 # Print number of zero data points to ensure data is not garbage
 num_zeros = len(list(filter(lambda x: x == 0, all_intervals)))
 print("Number of zero points: " + str(num_zeros))
 
 # CPU_GHZ = 1.8 # rohiths cpu
-CPU_GHZ = 3.3 # picard cpu
+CPU_GHZ = 2.6  # moore cpu
 all_intervals_usec = convert_cycles_list_to_usec_list(all_intervals, CPU_GHZ)
 print_statistics(all_intervals_usec, "usec")
 
 THRESHOLD_LOW_USEC = 0
-THRESHOLD_HIGH_USEC = 20
+THRESHOLD_HIGH_USEC = 100
 threshold_list(all_intervals_usec, THRESHOLD_LOW_USEC, THRESHOLD_HIGH_USEC, "usec")
-
+#fig = px.line(all_intervals_usec)
 fig = px.histogram(all_intervals_usec)
 fig.update_layout(
     xaxis_title="interval (microseconds)",
