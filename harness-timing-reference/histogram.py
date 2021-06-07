@@ -84,8 +84,8 @@ def calc_intervals(data_list):
 sanity_check(record_lengths)
 records_intervals = defaultdict(list)
 for t in records:
-    print("Records[{:d}]".format(t))
-    print(records[t])
+    #print("Records[{:d}]".format(t))
+    #print(records[t])
     records_intervals[t] =  calc_intervals(records[t])
 all_intervals = merge_threads_results(records_intervals)
 
