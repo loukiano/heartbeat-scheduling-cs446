@@ -98,7 +98,8 @@ void dump_intervals() {
 	}
 	
 	fprintf(fp, " \"Number of records per thread\": [ ");
-	for (int i = 0; i < num_threads; ++i) {
+	int i;
+	for (i = 0; i < num_threads; ++i) {
 		fprintf(fp, "%lu", num_interrupts[i + THREAD_OFFSET]);
 
 		if (i < num_threads - 1) {
@@ -110,7 +111,7 @@ void dump_intervals() {
 	}
 	fprintf(fp, " }\n");
 
-	for (int i = 0; i < num_threads * BUFFER_SIZE_PER_THREAD; ++i) {
+	for (i = 0; i < num_threads * BUFFER_SIZE_PER_THREAD; ++i) {
 		fprintf(fp, "%lu\n", intervals[i]);
 	}
 }
@@ -182,6 +183,7 @@ static void reset_timer(uint64_t which) {
 
 static void* make_item(uint64_t which, uint64_t tag, uint64_t isintr) {
   uint64_t gen = (isintr << 63) + (which << 32) + tag;
+  //last[which] = gen;
   return (void*)gen;
 }
 
@@ -195,13 +197,13 @@ static void handler(int sig, siginfo_t* si, void* priv) {
 #else
   uint64_t which = find_my_thread();
 #endif
-  uint64_t interval = cur - last[which];
+/*  uint64_t interval = cur - last[which];
   
   if (interval ==0) {
     DEBUG("INTERVAL WAS 0!!!!!!");
   }
-  
-  record_interval(which, num_interrupts[which], interval);
+  */
+  record_interval(which, num_interrupts[which], cur);
   num_interrupts[which] += 1;
 #if MEASURE_TIMERS
   reset_timer(which); 
@@ -214,7 +216,7 @@ static void thread_work(uint64_t which) {
   DEBUG("thread %lu\n", which);
 
   uint64_t i;
-  volatile uint64_t gen = 0;
+  //volatile uint64_t gen = 0;
   // wait for all producers and consumers to be ready
   pthread_barrier_wait(&barrier);
 #if MEASURE_TIMERS 
@@ -225,7 +227,7 @@ static void thread_work(uint64_t which) {
   DEBUG("%lu started timer\n", which);
   
   for (i = 0; i < AMT_WORK; i++) { //this is the fake work loop
-    gen = (uint64_t)make_item(which, rand(), 1);
+    make_item(which, rand(), 1);
   }
   //DEBUG("\t%lu done with work\n", which);
 #else
