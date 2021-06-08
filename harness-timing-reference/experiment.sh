@@ -13,7 +13,7 @@ uname -a > results/uname.txt
 cat /proc/cpuinfo > results/cpuinfo.txt
 cp /boot/config* results/
 dmesg > results/dmesg.txt
-gcc -v > results/gccv.txt
+gcc -v 2> results/gccv.txt
 top -b -n 1 > results/top.txt
 
 ./harness -b 5000000 -w 50000 -i 10
