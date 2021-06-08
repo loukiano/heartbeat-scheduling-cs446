@@ -94,18 +94,28 @@ num_zeros = len(list(filter(lambda x: x == 0, all_intervals)))
 print("Number of zero points: " + str(num_zeros))
 
 # CPU_GHZ = 1.8 # rohiths cpu
-CPU_GHZ = 2.6  # moore cpu
-all_intervals_usec = convert_cycles_list_to_usec_list(all_intervals, CPU_GHZ)
-print_statistics(all_intervals_usec, "usec")
+# CPU_GHZ = 2.6  # moore cpu
+CPU_GHZ = 3.3 # picard cpu
+
+first_intervals_usec = convert_cycles_list_to_usec_list(records_intervals[0], CPU_GHZ)
+print_statistics(first_intervals_usec, "usec")
 
 THRESHOLD_LOW_USEC = 0
 THRESHOLD_HIGH_USEC = 100
-threshold_list(all_intervals_usec, THRESHOLD_LOW_USEC, THRESHOLD_HIGH_USEC, "usec")
-#fig = px.line(all_intervals_usec)
-fig = px.histogram(all_intervals_usec)
+threshold_list(first_intervals_usec, THRESHOLD_LOW_USEC, THRESHOLD_HIGH_USEC, "usec")
+
+
+import matplotlib.pyplot as plt
+plt.plot(first_intervals_usec)
+plt.show()
+
+'''
+fig = px.line(first_intervals_usec)
+# fig = px.histogram(first_intervals_usec)
 fig.update_layout(
     xaxis_title="interval (microseconds)",
     yaxis_title="count"
 )
 # fig.update_xaxes(tick0=0, dtick=10)
 fig.show()
+'''
