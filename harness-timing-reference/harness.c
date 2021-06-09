@@ -225,9 +225,9 @@ static void thread_work(uint64_t which) {
   
   reset_timer(which);
   DEBUG("%lu started timer\n", which);
-  
+  //unsigned int * seed = (unsigned int*) 69420;
   for (i = 0; i < AMT_WORK; i++) { //this is the fake work loop
-    make_item(which, 69420, 0);
+    make_item(which, num_interrupts[which], 0);
   }
   //DEBUG("\t%lu done with work\n", which);
 #else
@@ -386,7 +386,7 @@ int main(int argc, char* argv[]) {
   
 
 
-  srand(time(NULL));
+  //srand(time(NULL));
   
   
   struct sigaction sa;
@@ -482,6 +482,7 @@ int main(int argc, char* argv[]) {
   INFO("Done!\n");
 
   dump_intervals(intervals);
+  INFO("intervals have been dumped\n");
   free(intervals);
 
   return 0;
