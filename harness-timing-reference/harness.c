@@ -227,7 +227,7 @@ static void thread_work(uint64_t which) {
   DEBUG("%lu started timer\n", which);
   
   for (i = 0; i < AMT_WORK; i++) { //this is the fake work loop
-    make_item(which, rand(), 0);
+    make_item(which, 69420, 0);
   }
   //DEBUG("\t%lu done with work\n", which);
 #else
