@@ -181,8 +181,8 @@ static void reset_timer(uint64_t which) {
 }
 
 
-static void* make_item(uint64_t which, uint64_t tag, uint64_t isintr) {
-  uint64_t gen = (isintr << 63) + (which << 32) + tag;
+static void* make_item(uint64_t which, volatile uint64_t tag, uint64_t isintr) {
+  volatile uint64_t gen = (isintr << 63) + (which << 32) + tag;
   //last[which] = gen;
   return (void*)gen;
 }
@@ -222,12 +222,14 @@ static void thread_work(uint64_t which) {
 #if MEASURE_TIMERS 
   DEBUG("thread %lu about to start timer\n", which);
   // now schedule a timer interrupt for ourselves
-  
+    
   reset_timer(which);
   DEBUG("%lu started timer\n", which);
   //unsigned int * seed = (unsigned int*) 69420;
+  
+  volatile uint64_t test = 69420;
   for (i = 0; i < AMT_WORK; i++) { //this is the fake work loop
-    make_item(which, num_interrupts[which], 0);
+    make_item(which, test, 0);
   }
   //DEBUG("\t%lu done with work\n", which);
 #else
