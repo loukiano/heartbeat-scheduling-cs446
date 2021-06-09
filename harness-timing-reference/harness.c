@@ -56,7 +56,7 @@ pthread_t* tid;   // array of thread ids
 // we need to use timer_create, etc to actually do per-thread timers
 timer_t* timer;
 
-uint64_t AMT_WORK = 1000000;
+uint64_t AMT_WORK = 123456;
 uint64_t* last; //array of last interrupt time
 uint64_t* num_interrupts; //array of interrupt count for each thread
 int num_cpus;
@@ -64,7 +64,7 @@ int num_cpus;
 // BEGIN code for recording individual intervals per thread
 // #define BUFFER_SIZE_PER_THREAD 20000
 // #define BUFFER_SIZE_PER_THREAD 400000
-int BUFFER_SIZE_PER_THREAD = 500000;
+uint64_t BUFFER_SIZE_PER_THREAD = 500000;
 uint64_t* intervals;
 
 uint64_t* init_intervals_arr() {
@@ -77,8 +77,8 @@ uint64_t* init_intervals_arr() {
 }
 
 
-inline void record_interval(int tid, int idx, uint64_t val) {
-	intervals[BUFFER_SIZE_PER_THREAD * (tid-THREAD_OFFSET) + idx] = val;
+inline void record_interval(uint64_t tid_me, uint64_t idx, uint64_t val) {
+	intervals[BUFFER_SIZE_PER_THREAD * (tid_me-THREAD_OFFSET) + idx] = val;
 }
 
 
@@ -88,7 +88,7 @@ void dump_intervals() {
 	// fclose(f);
 	fprintf(fp, "{");
 	fprintf(fp, " \"Number of threads\": %lu,", num_threads);
-	fprintf(fp, " \"Buffer size per thread\": %d,", BUFFER_SIZE_PER_THREAD);
+	fprintf(fp, " \"Buffer size per thread\": %ld,", BUFFER_SIZE_PER_THREAD);
 
 	if (TIMING_METHOD == 0) {
 		fprintf(fp, " \"Timing method\": \"rdtsc\",");
@@ -174,7 +174,7 @@ static void reset_timer(uint64_t which) {
   it.it_value.tv_nsec    = INTERRUPT_US * 1000;
 
   //DEBUG("%lu setting repeating timer interrupt for %lu us from now\n", which, INTERRUPT_US);
-  last[which] = measure_time();
+  //last[which] = measure_time();
   if (timer_settime(timer[which], 0, &it, 0)) {
     ERROR("Failed to set timer?!\n");
   }
@@ -207,7 +207,7 @@ static void handler(int sig, siginfo_t* si, void* priv) {
   num_interrupts[which] += 1;
 #if MEASURE_TIMERS
   reset_timer(which); 
-  last[which] = cur;
+  //last[which] = cur;
 #endif
 }
 
@@ -227,7 +227,7 @@ static void thread_work(uint64_t which) {
   DEBUG("%lu started timer\n", which);
   
   for (i = 0; i < AMT_WORK; i++) { //this is the fake work loop
-    make_item(which, rand(), 1);
+    make_item(which, rand(), 0);
   }
   //DEBUG("\t%lu done with work\n", which);
 #else
@@ -252,11 +252,13 @@ static void thread_work(uint64_t which) {
 static void print_arrays() {
   uint64_t i; 
   
-  for (i=0; i< (num_threads + THREAD_OFFSET); i++) {
-    DEBUG("num_interrupts %lu : %lu \n", i, num_interrupts[i]);
+  for (i=THREAD_OFFSET; i< (num_threads + THREAD_OFFSET); i++) {
+    
     if (num_interrupts[i] > BUFFER_SIZE_PER_THREAD) {
     	DEBUG("WARNING, TOO MANY ENTRIES!\n");
     	DEBUG("RUN WITH HIGHER VALUE FOR BUFFER_SIZE_PER_THREAD\n");
+    } else {
+	DEBUG("num_interrupts %lu : %lu \n", i, num_interrupts[i]);
     }
   }
 }
@@ -408,10 +410,11 @@ int main(int argc, char* argv[]) {
   }
   memset(timer, 0, sizeof(timer_t) * (num_threads));
   DEBUG("Allocated array of %ld timers\n", num_threads);
-#endif
+#else
+  DEBUG("NOT TESTING TIMERS");
   last = (uint64_t*)malloc(sizeof(uint64_t) * (num_threads + THREAD_OFFSET)); //array of last interrupt time
   memset(last, 0, sizeof(uint64_t) * (num_threads + THREAD_OFFSET));
-
+#endif
   num_interrupts = (uint64_t*)malloc(sizeof(uint64_t) * (num_threads + THREAD_OFFSET)); //array of interrupt count for each thread
   memset(num_interrupts, 0, sizeof(uint64_t) * (num_threads + THREAD_OFFSET));
 
@@ -421,9 +424,9 @@ int main(int argc, char* argv[]) {
     ERROR("Cannot allocate tids\n");
     return -1;
   }
-
+  DEBUG("allocated tid, num_interrupts\n");
   intervals = init_intervals_arr();
-
+  DEBUG("allocated intervals\n");
   memset(tid, 0, sizeof(sizeof(pthread_t) * (num_threads + THREAD_OFFSET)));
 
   tid[0] = -1;
@@ -469,7 +472,7 @@ int main(int argc, char* argv[]) {
       DEBUG("Done joining with %lu\n", i);
     }
   }
-  print_arrays();
+ // print_arrays();
   
 
   pthread_barrier_destroy(&barrier);

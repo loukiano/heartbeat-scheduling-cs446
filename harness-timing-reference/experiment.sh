@@ -16,17 +16,17 @@ dmesg > results/dmesg.txt
 gcc -v 2> results/gccv.txt
 top -b -n 1 > results/top.txt
 
-./harness -b 50000000 -w 50000 -i 10
-mv intervals.data results/b50M_w50K_i10.data 
+./harness -b 1000000 -w 50000 -i 10
+mv intervals.data results/b1M_w50K_i10.data 
 
-./harness -b 50000000 -w 50000 -i 20
-mv intervals.data results/b50M_w50K_i20.data
+./harness -b 500000 -w 50000 -i 20
+mv intervals.data results/b1M_w50K_i20.data
 
-./harness -b 50000000 -w 50000 -i 50
-mv intervals.data results/b50M_w50K_i50.data
+./harness -b 500000 -w 50000 -i 50
+mv intervals.data results/b1M_w50K_i50.data
 
-./harness -b 50000000 -w 50000 -i 100
-mv intervals.data results/b50M_w50K_i100.data
+./harness -b 500000 -w 50000 -i 100
+mv intervals.data results/b1M_w50K_i100.data
 
 tar -czvf $(uname -n).tar.gz results
 rm -r results
